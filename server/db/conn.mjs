@@ -11,6 +11,6 @@ try {
   console.error(e);
 }
 
-let db = conn.db("password_server");
+let db = conn.db("speed_server");
 
 export default db;
