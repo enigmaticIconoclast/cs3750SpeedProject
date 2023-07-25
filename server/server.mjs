@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import "./loadEnvironment.mjs";
 import records from "./routes/record.mjs";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 const PORT = process.env.PORT || 5050;
 const app = express();
@@ -54,8 +56,32 @@ function drawCard (from, to){
   to.unshift(from.shift());
 }
 
+//socket.io
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:3000",
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`Socket ${socket.id} connected on server.mjs`);
+
+  socket.on('sendMessage', (message) => {
+    console.log(message + " from server.mjs");
+    io.emit('message', message);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected on server.mjs. Socket ID:", socket.id);
+  });
+});
+
+httpServer.listen(PORT, () => {
+  console.log(`Socket.IO server running at http://localhost:${PORT}`);
+});
 
 // start the Express server
-app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port: ${PORT}`);
+// });

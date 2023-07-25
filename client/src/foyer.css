@@ -1,0 +1,26 @@
+.room-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  
+  /* Styles for the room title */
+  .room-title {
+    font-size: 20px;
+  }
+  
+  /* Styles for the player count */
+  .player-count {
+    font-size: 16px;
+  }
+  
+  /* Styles for the chat box */
+  .chat-box {
+    height: 400px; /* Adjust the height as needed */
+    border: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto; /* Allow vertical scrolling if needed */
+  }
