@@ -153,8 +153,20 @@ io.on("connection", (socket) => {
   socket.emit("dataFromServer", testJSON);
 
   socket.on("sendMessage", (message) => {
-    console.log(message + " from server.mjs");
-    io.emit("message", message);
+    console.log(message + " from backend server.mjs");
+    const id = message.id;
+    console.log(id + " i have received the id from the frontend user");
+    
+    //for the emoji preset
+    if (id === 1) {
+      const emoji = "You sent ID 1! from server.mjs";
+      io.emit('message', { message: emoji });
+    }
+    
+    //basic message 
+    else {
+      io.emit('message', message);
+    }
   });
 
   socket.on("disconnect", () => {
