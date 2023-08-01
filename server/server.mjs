@@ -148,6 +148,9 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
+  // Active room array
+  let activeRooms = [];
+  // May need to delete above
   console.log(`Socket ${socket.id} connected on server.mjs`);
 
   socket.emit("dataFromServer", testJSON);
@@ -156,17 +159,29 @@ io.on("connection", (socket) => {
     console.log(message + " from backend server.mjs");
     const id = message.id;
     console.log(id + " i have received the id from the frontend user");
-    
+
     //for the emoji preset
     if (id === 1) {
       const emoji = "You sent ID 1! from server.mjs";
-      io.emit('message', { message: emoji });
+      io.emit("message", { message: emoji });
     }
-    
-    //basic message 
+
+    //basic message
     else {
-      io.emit('message', message);
+      io.emit("message", message);
     }
+  });
+
+  socket.on("createRoom", () => {
+    let newRoom = "room" + activeRooms.length;
+    activeRooms.push(newRoom);
+    console.log("User created room:", activeRooms[-1]);
+    socket.join(room);
+  });
+
+  socket.on("joinRoom", (room) => {
+    console.log("User joined room:", room);
+    socket.join(room);
   });
 
   socket.on("disconnect", () => {
@@ -177,8 +192,3 @@ io.on("connection", (socket) => {
 httpServer.listen(PORT, () => {
   console.log(`Socket.IO server running at http://localhost:${PORT}`);
 });
-
-// start the Express server
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port: ${PORT}`);
-// });
