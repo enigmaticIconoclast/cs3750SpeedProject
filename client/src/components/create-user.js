@@ -29,7 +29,7 @@ export default function CreateUser(){
 
                 const newUser = {...form};
 
-                await fetch("http://localhoast:5050/create-user",{
+                await fetch("http://localhost:5050/create-user",{
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

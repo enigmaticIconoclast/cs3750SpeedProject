@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-const connectionString = process.env.ATLAS_URI || "";
+const connectionString = 'mongodb+srv://cs3750:Password1@cluster0.spduehw.mongodb.net/?retryWrites=true&w=majority';
 
 const client = new MongoClient(connectionString);
 
