@@ -1,26 +1,85 @@
 .room-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f0f0f0;
-    padding: 10px;
-    margin-top: 10px;
-  }
-  
-  /* Styles for the room title */
-  .room-title {
-    font-size: 20px;
-  }
-  
-  /* Styles for the player count */
-  .player-count {
-    font-size: 16px;
-  }
-  
-  /* Styles for the chat box */
-  .chat-box {
-    height: 400px; /* Adjust the height as needed */
-    border: 1px solid #ccc;
-    padding: 10px;
-    overflow-y: auto; /* Allow vertical scrolling if needed */
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.room-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-info h3 {
+  margin-bottom: 8px;
+}
+
+.room-info p {
+  margin: 0;
+}
+
+.room-title {
+  font-size: 20px;
+}
+
+.room-all{
+  margin-top: 20px;
+}
+
+.room-all h2{
+  text-align: center;
+}
+
+/* Styles for the player count */
+.player-count {
+  font-size: 16px;
+}
+
+/* Styles for the chat box */
+.chat-box {
+  margin-top: 10px;
+  background-color: #f9faad;
+  height: calc(100vh - 20px);
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.message-left {
+  text-align: left;
+  width: 100%;
+  background-color: #e6f7ff;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+/* Style for messages on the right (sent by other users) */
+.message-right {
+  text-align: right;
+  background-color: #b6fa9b;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.username {
+  font-weight: bold;
+}
+
+/* Style for the message content */
+.message-content {
+  display: inline;
+}
+
+.sendButton{
+  float: right;
+}
+
+.messages-container {
+  height: calc(100vh - 250px); 
+  overflow-y: auto; /* Enable vertical scrolling */
+}

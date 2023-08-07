@@ -175,6 +175,8 @@ function drawCard(from, to) {
 }
 
 //socket.io
+const emojis = [ "🎮", "❓", "🃏", "😀", "😢", "💩", "🤡", "👋",
+                 "👍", "🌴", "✔️", "💀", "🤬", "🤯", "🧠", "🥳" ]
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -190,11 +192,11 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", (message) => {
     console.log(message + " from backend server.mjs");
     const id = message.id;
-    console.log(id + " i have received the id from the frontend user");
+    //console.log(id + " i have received the id from the frontend user");
     
     //for the emoji preset
-    if (id === 1) {
-      const emoji = "You sent ID 1! from server.mjs";
+    if (emojis[id]) {
+      const emoji = emojis[id];
       io.emit('message', { message: emoji });
     }
     
