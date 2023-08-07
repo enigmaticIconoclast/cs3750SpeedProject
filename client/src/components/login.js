@@ -43,8 +43,7 @@ export default function Login(){
             const loggedIn = await passResponse.json();
             if(loggedIn.signedIn)
             {
-                alert("You are logged in!");
-                navigate("/");
+                navigate("/foyer");
             }
             else{
                 alert("Invalid Password");
@@ -103,6 +102,14 @@ export default function Login(){
                           </Button>
                         </div>
                       </Form>
+                      <div className="mt-3">
+                         <p className="mb-0  text-center">
+                            Don't have an account?{' '}
+                            <a href="/create-user" className="text-primary fw-bold">
+                              Sign Up
+                            </a>
+                          </p>
+                        </div>
                     </div>
                   </div>
                 </Card.Body>

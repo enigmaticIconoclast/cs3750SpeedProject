@@ -40,7 +40,7 @@ export default function CreateUser(){
                     return;
                 });
                 localStorage.setItem("userName", form.userName); //setting username to local storage to pass around
-                navigate('/Login');
+                navigate('/Foyer');
             }
             else{
                 alert("Password must be at least 16 characters");
@@ -120,7 +120,7 @@ export default function CreateUser(){
                                         <div className="mt-3">
                                             <p className="mb-0  text-center">
                                                 Already have an account?{' '}
-                                                <a href="{''}" className="text-primary fw-bold">
+                                                <a href="/" className="text-primary fw-bold">
                                                     Sign In
                                                 </a>
                                             </p>
