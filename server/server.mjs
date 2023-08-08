@@ -3,7 +3,8 @@ import express from "express";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import db from "./db/conn.mjs"
+import db from "./db/conn.mjs";
+import { v4 } from "uuid";
 
 // local files
 import "./loadEnvironment.mjs";
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 5050;
 const app = express();
 // const server = http.createServer(app);
 // const io = new Server(server);
+
+const rooms = [];
 
 let testJSON = {
   p1hand: ["CA", "C2"],
@@ -43,40 +46,40 @@ app.use(express.json());
 // });
 
 app.use("/record", records);
-app.use("/create-user", async (req, res)=>{
+app.use("/create-user", async (req, res) => {
   let newDocument = {
-      username: req.body.userName,
-      salt: req.body.saltScore,
-      password: req.body.password,
-      email: req.body.email,
+    username: req.body.userName,
+    salt: req.body.saltScore,
+    password: req.body.password,
+    email: req.body.email,
   };
   let collection = await db.collection("Users");
   let result = await collection.insertOne(newDocument);
   res.send(result).status(204);
 });
 
-app.use('/login-user', async(req,res)=>{
+app.use("/login-user", async (req, res) => {
   let collection = await db.collection("Users");
-  let query = {username: req.body.username};
+  let query = { username: req.body.username };
   let result = await collection.findOne(query);
 
-  if(!result) res.send({saltScore: null}).status(404);
-  else{
-      let salt = result.salt;
-      res.send({saltScore: salt}).status(200);
-  } 
+  if (!result) res.send({ saltScore: null }).status(404);
+  else {
+    let salt = result.salt;
+    res.send({ saltScore: salt }).status(200);
+  }
 });
 
-app.use('/login-password', async(req,res)=>{
+app.use("/login-password", async (req, res) => {
   let collection = await db.collection("Users");
-  let query = {username: req.body.userName};
+  let query = { username: req.body.userName };
   let result = await collection.findOne(query);
 
-  if(!result) res.send({signedIn: false}).status(404);
-  else if(req.body.password === result.password)res.send({signedIn: true}).status(200);
-  else res.send({signedIn: false}).status(404);
+  if (!result) res.send({ signedIn: false }).status(404);
+  else if (req.body.password === result.password)
+    res.send({ signedIn: true }).status(200);
+  else res.send({ signedIn: false }).status(404);
 });
-
 
 //Using to build a demo card management system
 app.use("/cardDemo", (req, res) => {
@@ -175,8 +178,24 @@ function drawCard(from, to) {
 }
 
 //socket.io
-const emojis = [ "🎮", "❓", "🃏", "😀", "😢", "💩", "🤡", "👋",
-                 "👍", "🌴", "✔️", "💀", "🤬", "🤯", "🧠", "🥳" ]
+const emojis = [
+  "🎮",
+  "❓",
+  "🃏",
+  "😀",
+  "😢",
+  "💩",
+  "🤡",
+  "👋",
+  "👍",
+  "🌴",
+  "✔️",
+  "💀",
+  "🤬",
+  "🤯",
+  "🧠",
+  "🥳",
+];
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -187,22 +206,35 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log(`Socket ${socket.id} connected on server.mjs`);
 
-  socket.emit("dataFromServer", testJSON);
+  socket.on("getRooms", () => {
+    console.log("getRooms on server.mjs");
+    socket.emit("roomList", rooms);
+  });
+
+  socket.on("createRoom", () => {
+    // generate a random room id
+    const room = v4();
+    socket.join(room);
+    rooms.push(room);
+    console.log("Room created on server.mjs:", room);
+    socket.emit("roomCreated", room);
+    socket.emit("roomList", rooms);
+  });
 
   socket.on("sendMessage", (message) => {
     console.log(message + " from backend server.mjs");
     const id = message.id;
     //console.log(id + " i have received the id from the frontend user");
-    
+
     //for the emoji preset
     if (emojis[id]) {
       const emoji = emojis[id];
-      io.emit('message', { message: emoji });
+      io.emit("message", { message: emoji });
     }
-    
-    //basic message 
+
+    //basic message
     else {
-      io.emit('message', message);
+      io.emit("message", message);
     }
   });
 

@@ -1,61 +1,111 @@
-import React, { useState, useEffect, useRef } from "react"
-import { Container, Row, Col, Button, Form } from "react-bootstrap"
-import { io } from "socket.io-client"
-import "../foyer.css"
+import React, { useState, useEffect, useRef } from "react";
+import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { io } from "socket.io-client";
+import "../foyer.css";
 
 export default function Foyer() {
-  const socket = io("http://localhost:5050")
+  const socket = io("http://localhost:5050");
   //console.log("Socket connected from foyer.js:", socket.connected)
 
   const [name, setName] = useState();
-  const [message, setMessage] = useState("")
-  const [messages, setMessages] = useState([])
-  const [hasEnteredChat, setHasEnteredChat] = useState(false)
-  const emojis = [ "🎮", "❓", "🃏", "😀", "😢", "💩", "🤡", "👋",
-                 "👍", "🌴", "✔️", "💀", "🤬", "🤯", "🧠", "🥳" ]
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [hasEnteredChat, setHasEnteredChat] = useState(false);
+  const [roomNumber, setRoomNumber] = useState(0);
+  const [rooms, setRooms] = useState([]);
+  const emojis = [
+    "🎮",
+    "❓",
+    "🃏",
+    "😀",
+    "😢",
+    "💩",
+    "🤡",
+    "👋",
+    "👍",
+    "🌴",
+    "✔️",
+    "💀",
+    "🤬",
+    "🤯",
+    "🧠",
+    "🥳",
+  ];
   const messagesContainerRef = useRef(null);
-  
+
   useEffect(() => {
     socket.on("message", (message) => {
-      setMessages((messages) => [...messages, message])
-    })
+      setMessages((messages) => [...messages, message]);
+    });
 
     //stop repeated messages
     return () => {
-      socket.off("message")
-    }
-  }, [])
+      socket.off("message");
+    };
+  }, []);
 
   const addEmojiToMessage = (emoji) => {
-    setMessage((prevMessage) => prevMessage + emoji)
-  }
+    setMessage((prevMessage) => prevMessage + emoji);
+  };
 
   useEffect(() => {
     // Scroll to the bottom of the messages container whenever new messages are added
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
   //handles the regular messages
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Form submitted with name:", name, "and message:", message)
+    e.preventDefault();
+    console.log("Form submitted with name:", name, "and message:", message);
 
     if (name && message) {
-      console.log("name: " + name + " message: " + message)
-      socket.emit("sendMessage", { name, message })
-      setMessage("")
+      console.log("name: " + name + " message: " + message);
+      socket.emit("sendMessage", { name, message });
+      setMessage("");
 
       if (!hasEnteredChat) {
         setMessages((messages) => [
           ...messages,
           { message: `${name} has entered the chat`, isInfoMessage: true },
-        ])
-        setHasEnteredChat(true)
+        ]);
+        setHasEnteredChat(true);
       }
     }
-  }
+  };
+
+  // Effect to handle room-related actions
+  useEffect(() => {
+    // Emit "getRooms" event to fetch the room list when the component mounts
+    socket.emit("getRooms");
+
+    // Listen for "roomList" event and update rooms state
+    socket.on("roomList", (roomList) => {
+      console.log("uE: roomList event received with roomList:", roomList);
+      setRooms(roomList);
+    });
+
+    // Clean up socket listeners when the component unmounts
+    return () => {
+      socket.off("roomList");
+    };
+  }, []);
+
+  const handleCreateRoom = () => {
+    if (roomNumber === 0) {
+      socket.emit("createRoom");
+      socket.on("roomCreated", (roomID) => {
+        console.log("roomCreated event received with roomID:", roomID);
+        setRoomNumber(roomID);
+      });
+      socket.on("roomList", (roomList) => {
+        console.log("hCR: roomList event received with roomList:", roomList);
+        setRooms(roomList);
+      });
+    }
+  };
 
   // Retrieve the username from local storage
   useEffect(() => {
@@ -70,30 +120,26 @@ export default function Foyer() {
       <Container>
         <Row>
           <Col xs={12} md={8}>
-          <div className="room-all">
-            <h2>Foyer Room</h2>
-            <h4>Global Room</h4>
+            <div className="room-all">
+              <h2>Foyer Room</h2>
+              <h4>Global Room</h4>
             </div>
-            <div className="room-info">
-              <h5>Classic Speed</h5>
-              <p>Amount of Users: 0/2</p>
-              <Button variant="primary">Join Foyer</Button>
-            </div>
-            <div className="room-info">
-              <h5>California Speed</h5>
-              <p>Amount of Users: 0/2</p>
-              <Button variant="primary">Join Foyer</Button>
-            </div>
+            {rooms.map((room) => (
+              <div className="room-info" key={room}>
+                <h5>{room.slice(-6)}</h5>
+                {/* <p>Amount of Users: {room.users.length}/2</p> */}
+                <Button variant="primary">Join Foyer</Button>
+              </div>
+            ))}
 
             <br />
             <br />
 
             <h6>Created Rooms</h6>
-            <button>Classic</button>
+            <button onClick={() => handleCreateRoom()}>Classic</button>
             <button>California</button>
-
           </Col>
-          
+
           <Col xs={12} md={4} className="chat-box">
             <form onSubmit={handleSubmit}>
               {!hasEnteredChat && (
@@ -106,7 +152,11 @@ export default function Foyer() {
                   style={{ width: "100%" }}
                 />
               )}
-              {hasEnteredChat && <p>Username:<strong> {name}</strong></p>}
+              {hasEnteredChat && (
+                <p>
+                  Username:<strong> {name}</strong>
+                </p>
+              )}
               <input
                 type="text"
                 value={message}
@@ -116,11 +166,12 @@ export default function Foyer() {
               />
               <div className="emoji-buttons-container">
                 {emojis.map((emoji, index) => (
-                  <Button style={{
-                    fontSize: "20px",
-                    background: "none",
-                    border: "none",
-                  }}
+                  <Button
+                    style={{
+                      fontSize: "20px",
+                      background: "none",
+                      border: "none",
+                    }}
                     key={index}
                     variant="primary"
                     className="emoji-button"
@@ -130,8 +181,10 @@ export default function Foyer() {
                   </Button>
                 ))}
               </div>
-              <button className="sendButton" type="submit">Send</button>
-              <br/>
+              <button className="sendButton" type="submit">
+                Send
+              </button>
+              <br />
             </form>
             <div>
               <br />
@@ -140,7 +193,11 @@ export default function Foyer() {
                   <div
                     key={index}
                     className={
-                      message.isInfoMessage ? "message-left": message.name === name ? "message-left" : "message-right"
+                      message.isInfoMessage
+                        ? "message-left"
+                        : message.name === name
+                        ? "message-left"
+                        : "message-right"
                     }
                   >
                     <span className="username">{message.name}</span>{" "}
@@ -153,5 +210,5 @@ export default function Foyer() {
         </Row>
       </Container>
     </div>
-  )
+  );
 }
