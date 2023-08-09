@@ -125,7 +125,7 @@ export default function Foyer() {
 
   // Retrieve the username from local storage
   useEffect(() => {
-    const createdUsername = localStorage.getItem("userName");
+    const createdUsername = sessionStorage.getItem("userName");
     if (createdUsername) {
       setName(createdUsername);
     }

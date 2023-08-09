@@ -39,7 +39,7 @@ export default function CreateUser(){
                     window.alert(error);
                     return;
                 });
-                localStorage.setItem("userName", form.userName); //setting username to local storage to pass around
+                sessionStorage.setItem("userName", form.userName); //setting username to local storage to pass around
                 navigate('/Foyer');
             }
             else{

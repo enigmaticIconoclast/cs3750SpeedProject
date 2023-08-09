@@ -43,6 +43,7 @@ export default function Login(){
             const loggedIn = await passResponse.json();
             if(loggedIn.signedIn)
             {
+              sessionStorage.setItem("userName", form.userName);
                 navigate("/foyer");
             }
             else{
