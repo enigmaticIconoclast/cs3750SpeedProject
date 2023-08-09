@@ -11,7 +11,7 @@ export default function Foyer() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [hasEnteredChat, setHasEnteredChat] = useState(false);
-  const [roomNumber, setRoomNumber] = useState(0);
+  const [roomNumber, setRoomNumber] = useState("");
   const [rooms, setRooms] = useState([]);
   const emojis = [
     "🎮",
@@ -83,7 +83,6 @@ export default function Foyer() {
 
     // Listen for "roomList" event and update rooms state
     socket.on("roomList", (roomList) => {
-      console.log("uE: roomList event received with roomList:", roomList);
       setRooms(roomList);
     });
 
@@ -94,18 +93,35 @@ export default function Foyer() {
   }, []);
 
   const handleCreateRoom = () => {
-    if (roomNumber === 0) {
+    if (roomNumber === "") {
       socket.emit("createRoom");
       socket.on("roomCreated", (roomID) => {
         console.log("roomCreated event received with roomID:", roomID);
         setRoomNumber(roomID);
       });
       socket.on("roomList", (roomList) => {
-        console.log("hCR: roomList event received with roomList:", roomList);
         setRooms(roomList);
       });
     }
   };
+
+  const handleJoinRoom = (roomID) => {
+    socket.emit("joinRoom", roomID);
+    socket.on("roomJoined", (roomID) => {
+      console.log("roomJoined event received with roomID:", roomID);
+      setRoomNumber(roomID);
+    });
+  };
+
+  const handleEmitRoom = () => {
+    socket.emit("emitRoom", roomNumber);
+  };
+
+  useEffect(() => {
+    socket.on("roomEmitted", (roomID) => {
+      console.log("roomEmitted event received with roomID:", roomID);
+    });
+  }, []);
 
   // Retrieve the username from local storage
   useEffect(() => {
@@ -128,7 +144,9 @@ export default function Foyer() {
               <div className="room-info" key={room}>
                 <h5>{room.slice(-6)}</h5>
                 {/* <p>Amount of Users: {room.users.length}/2</p> */}
-                <Button variant="primary">Join Foyer</Button>
+                <Button variant="primary" onClick={() => handleJoinRoom(room)}>
+                  Join Foyer
+                </Button>
               </div>
             ))}
 
@@ -138,6 +156,7 @@ export default function Foyer() {
             <h6>Created Rooms</h6>
             <button onClick={() => handleCreateRoom()}>Classic</button>
             <button>California</button>
+            <button onClick={() => handleEmitRoom()}>Emit Room</button>
           </Col>
 
           <Col xs={12} md={4} className="chat-box">

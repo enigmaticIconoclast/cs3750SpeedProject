@@ -221,6 +221,18 @@ io.on("connection", (socket) => {
     socket.emit("roomList", rooms);
   });
 
+  socket.on("joinRoom", (room) => {
+    console.log("joinRoom on server.mjs:", room);
+    socket.join(room);
+    socket.emit("roomJoined", room);
+  });
+
+  socket.on("emitRoom", (room) => {
+    console.log("emitRoom on server.mjs:", room);
+    // socket.to(room).emit("roomEmitted", room);
+    socket.emit("roomEmitted", room);
+  });
+
   socket.on("sendMessage", (message) => {
     console.log(message + " from backend server.mjs");
     const id = message.id;
