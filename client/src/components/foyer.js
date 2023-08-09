@@ -11,7 +11,7 @@ export default function Foyer() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [hasEnteredChat, setHasEnteredChat] = useState(false);
-  const [roomNumber, setRoomNumber] = useState("");
+  const [roomNumber, setRoomNumber] = useState(null);
   const [rooms, setRooms] = useState([]);
   const emojis = [
     "🎮",
@@ -92,36 +92,59 @@ export default function Foyer() {
     };
   }, []);
 
+  useEffect(() => {
+    // Listen for "roomCreated" event and update roomNumber state
+    socket.on("roomCreated", (roomID) => {
+      setRooms((rooms) => [...rooms, roomID]); // add the new room to the list of rooms
+    });
+
+    // Clean up socket listeners when the component unmounts
+    return () => {
+      socket.off("roomCreated");
+    };
+  }, []);
+
+  const createRandomRoomNumber = () => {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const length = 6;
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(
+        Math.floor(Math.random() * characters.length)
+      );
+    }
+    return result;
+  };
+
   const handleCreateRoom = () => {
-    if (roomNumber === "") {
-      socket.emit("createRoom");
-      socket.on("roomCreated", (roomID) => {
-        console.log("roomCreated event received with roomID:", roomID);
-        setRoomNumber(roomID);
-      });
-      socket.on("roomList", (roomList) => {
-        setRooms(roomList);
-      });
+    if (!roomNumber) {
+      const roomID = createRandomRoomNumber();
+      socket.emit("createRoom", roomID);
+      setRoomNumber(roomID);
+      setRooms((rooms) => [...rooms, roomID]); // add the new room to the list of rooms
+    } else {
+      alert("You are already in a room!");
     }
   };
 
-  const handleJoinRoom = (roomID) => {
-    socket.emit("joinRoom", roomID);
-    socket.on("roomJoined", (roomID) => {
-      console.log("roomJoined event received with roomID:", roomID);
-      setRoomNumber(roomID);
-    });
-  };
+  // const handleJoinRoom = (roomID) => {
+  //   socket.emit("joinRoom", roomID);
+  //   socket.on("roomJoined", (roomID) => {
+  //     console.log("roomJoined event received with roomID:", roomID);
+  //     setRoomNumber(roomID);
+  //   });
+  // };
 
-  const handleEmitRoom = () => {
-    socket.emit("emitRoom", roomNumber);
-  };
+  // const handleEmitRoom = () => {
+  //   socket.emit("emitRoom", roomNumber);
+  // };
 
-  useEffect(() => {
-    socket.on("roomEmitted", (roomID) => {
-      console.log("roomEmitted event received with roomID:", roomID);
-    });
-  }, []);
+  // useEffect(() => {
+  //   socket.on("roomEmitted", (roomID) => {
+  //     console.log("roomEmitted event received with roomID:", roomID);
+  //   });
+  // }, []);
 
   // Retrieve the username from local storage
   useEffect(() => {
@@ -144,9 +167,8 @@ export default function Foyer() {
               <div className="room-info" key={room}>
                 <h5>{room.slice(-6)}</h5>
                 {/* <p>Amount of Users: {room.users.length}/2</p> */}
-                <Button variant="primary" onClick={() => handleJoinRoom(room)}>
-                  Join Foyer
-                </Button>
+                {/* onClick={() => handleJoinRoom(room)} */}
+                <Button variant="primary">Join Foyer</Button>
               </div>
             ))}
 
@@ -156,7 +178,7 @@ export default function Foyer() {
             <h6>Created Rooms</h6>
             <button onClick={() => handleCreateRoom()}>Classic</button>
             <button>California</button>
-            <button onClick={() => handleEmitRoom()}>Emit Room</button>
+            {/* <button onClick={() => handleEmitRoom()}>Emit Room</button> */}
           </Col>
 
           <Col xs={12} md={4} className="chat-box">

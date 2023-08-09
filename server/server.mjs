@@ -4,7 +4,6 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import db from "./db/conn.mjs";
-import { v4 } from "uuid";
 
 // local files
 import "./loadEnvironment.mjs";
@@ -83,8 +82,7 @@ app.use("/login-password", async (req, res) => {
   else res.send({ signedIn: false }).status(404);
 });
 
-
-app.use("/classicStart", (req, res) =>{
+app.use("/classicStart", (req, res) => {
   let starterDeck = generateDeck();
   shuffleDeck(cardDeck);
   shuffleDeck(cardDeck);
@@ -97,7 +95,7 @@ app.use("/classicStart", (req, res) =>{
   let leftPlayDeck = [];
   let rightPlayDeck = [];
 
-  for(let i = 0; i<5; i++){
+  for (let i = 0; i < 5; i++) {
     drawCard(cardDeck, player1Hand);
     drawCard(cardDeck, player2Hand);
   }
@@ -105,22 +103,20 @@ app.use("/classicStart", (req, res) =>{
   drawCard(cardDeck, playPileLeft);
   drawCard(cardDeck, playPileRight);
 
-  for(let i = 0; i<15; i++){
+  for (let i = 0; i < 15; i++) {
     drawCard(cardDeck, player1Deck);
     drawCard(cardDeck, player2Deck);
   }
 
-  for(let i = 0; i<5; i++){
+  for (let i = 0; i < 5; i++) {
     drawCard(cardDeck, leftPlayDeck);
     drawCard(cardDeck, rightPlayDeck);
   }
-  
 });
 
 //Using to build a demo card management system
 app.use("/cardDemo", (req, res) => {
   let result = "Hello World";
-  
 
   let playerHand = new Array();
   let player2Hand = new Array();
@@ -160,12 +156,60 @@ function drawCard(from, to) {
   to.unshift(from.shift());
 }
 
-function generateDeck(){
+function generateDeck() {
   let cardDeck = [
-    "CA","C2","C3","C4","C5","C6","C7","C8","C9","C10","CJ","CQ","CK",
-    "DA","D2","D3","D4","D5","D6","D7","D8","D9","D10","DJ","DQ","DK",
-    "HA","H2","H3","H4","H5","H6","H7","H8","H9","H10","HJ","HQ","HK",
-    "SA","S2","S3","S4","S5","S6","S7","S8","S9","S10","SJ","SQ","SK",
+    "CA",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "C9",
+    "C10",
+    "CJ",
+    "CQ",
+    "CK",
+    "DA",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9",
+    "D10",
+    "DJ",
+    "DQ",
+    "DK",
+    "HA",
+    "H2",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "H7",
+    "H8",
+    "H9",
+    "H10",
+    "HJ",
+    "HQ",
+    "HK",
+    "SA",
+    "S2",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8",
+    "S9",
+    "S10",
+    "SJ",
+    "SQ",
+    "SK",
   ];
   return cardDeck;
 }
@@ -204,20 +248,16 @@ io.on("connection", (socket) => {
     socket.emit("roomList", rooms);
   });
 
-  socket.on("createRoom", () => {
-    // generate a random room id
-    const room = v4();
-    socket.join(room);
-    rooms.push(room);
-    console.log("Room created on server.mjs:", room);
-    socket.emit("roomCreated", room);
-    socket.emit("roomList", rooms);
+  socket.on("createRoom", (roomID) => {
+    socket.join(roomID);
+    rooms.push(roomID);
+    console.log("Room created on server.mjs:", roomID);
+    socket.emit("roomCreated", roomID);
   });
 
   socket.on("joinRoom", (room) => {
     console.log("joinRoom on server.mjs:", room);
     socket.join(room);
-    socket.emit("roomJoined", room);
   });
 
   socket.on("emitRoom", (room) => {
