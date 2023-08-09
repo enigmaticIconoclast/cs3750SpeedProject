@@ -17,6 +17,8 @@ const app = express();
 
 const rooms = [];
 
+const classicGameStates = [];
+
 let testJSON = {
   p1hand: ["CA", "C2"],
   p2hand: ["C3", "C4"],
@@ -81,63 +83,44 @@ app.use("/login-password", async (req, res) => {
   else res.send({ signedIn: false }).status(404);
 });
 
+
+app.use("/classicStart", (req, res) =>{
+  let starterDeck = generateDeck();
+  shuffleDeck(cardDeck);
+  shuffleDeck(cardDeck);
+  let playPileLeft = [];
+  let playPileRight = [];
+  let player1Hand = [];
+  let player2Hand = [];
+  let player1Deck = [];
+  let player2Deck = [];
+  let leftPlayDeck = [];
+  let rightPlayDeck = [];
+
+  for(let i = 0; i<5; i++){
+    drawCard(cardDeck, player1Hand);
+    drawCard(cardDeck, player2Hand);
+  }
+
+  drawCard(cardDeck, playPileLeft);
+  drawCard(cardDeck, playPileRight);
+
+  for(let i = 0; i<15; i++){
+    drawCard(cardDeck, player1Deck);
+    drawCard(cardDeck, player2Deck);
+  }
+
+  for(let i = 0; i<5; i++){
+    drawCard(cardDeck, leftPlayDeck);
+    drawCard(cardDeck, rightPlayDeck);
+  }
+  
+});
+
 //Using to build a demo card management system
 app.use("/cardDemo", (req, res) => {
   let result = "Hello World";
-  let cardDeck = [
-    "CA",
-    "C2",
-    "C3",
-    "C4",
-    "C5",
-    "C6",
-    "C7",
-    "C8",
-    "C9",
-    "C10",
-    "CJ",
-    "CQ",
-    "CK",
-    "DA",
-    "D2",
-    "D3",
-    "D4",
-    "D5",
-    "D6",
-    "D7",
-    "D8",
-    "D9",
-    "D10",
-    "DJ",
-    "DQ",
-    "DK",
-    "HA",
-    "H2",
-    "H3",
-    "H4",
-    "H5",
-    "H6",
-    "H7",
-    "H8",
-    "H9",
-    "H10",
-    "HJ",
-    "HQ",
-    "HK",
-    "SA",
-    "S2",
-    "S3",
-    "S4",
-    "S5",
-    "S6",
-    "S7",
-    "S8",
-    "S9",
-    "S10",
-    "SJ",
-    "SQ",
-    "SK",
-  ];
+  
 
   let playerHand = new Array();
   let player2Hand = new Array();
@@ -175,6 +158,16 @@ function shuffleDeck(deckArray) {
 
 function drawCard(from, to) {
   to.unshift(from.shift());
+}
+
+function generateDeck(){
+  let cardDeck = [
+    "CA","C2","C3","C4","C5","C6","C7","C8","C9","C10","CJ","CQ","CK",
+    "DA","D2","D3","D4","D5","D6","D7","D8","D9","D10","DJ","DQ","DK",
+    "HA","H2","H3","H4","H5","H6","H7","H8","H9","H10","HJ","HQ","HK",
+    "SA","S2","S3","S4","S5","S6","S7","S8","S9","S10","SJ","SQ","SK",
+  ];
+  return cardDeck;
 }
 
 //socket.io
